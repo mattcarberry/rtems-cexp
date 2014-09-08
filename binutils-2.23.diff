@@ -1,0 +1,116 @@
+ patch against binutils-2.23 in order to enable building the
+ libbfd, libiberty and libopcodes libraries for an RTEMS host:
+
+   o unneeded 'getopt' from libiberty -- it would actually
+     clash with what's already in newlib/rtems.
+   o do not install libiberty into a multilib subdirectory.
+     No other part of binutils can be built as multilibs
+	 and the 'strange' install location of libiberty will
+	 confuse application makefiles which expects it in the
+	 same place where libbfd etc. reside.
+   o omit a few details from ppc disassembler when building
+     with pmbfd.
+   o bugfix in coffcode.h: Need to include <bfd_stdint.h>
+
+  To apply this patch, chdir to the directory containing binutils-2.23
+  and issue (it is always a good idea to run with the --dry-run option first)
+
+     patch -p0 -b < <this file>
+
+  Till Straumann, 1/2013
+
+*** binutils-2.23/libiberty/getopt.c.orig	2013-01-17 13:25:50.184066036 -0800
+--- binutils-2.23/libiberty/getopt.c	2013-01-17 13:26:16.807302850 -0800
+***************
+*** 61,66 ****
+--- 61,73 ----
+  # endif
+  #endif
+  
++ /* newlibc provides getopt but I have no easy way to check for newlib.
++  * However, we know that rtems uses newlib...
++  */
++ #ifdef __rtems__
++ #define ELIDE_CODE
++ #endif
++ 
+  #ifndef ELIDE_CODE
+  
+  
+*** binutils-2.23/libiberty/getopt1.c.orig	2013-01-17 13:26:49.174374774 -0800
+--- binutils-2.23/libiberty/getopt1.c	2013-01-17 13:27:13.857666850 -0800
+***************
+*** 52,57 ****
+--- 52,64 ----
+  #endif
+  #endif
+  
++ /* newlibc provides getopt but I have no easy way to check for newlib.
++  * However, we know that rtems uses newlib...
++  */
++ #ifdef __rtems__
++ #define ELIDE_CODE
++ #endif
++ 
+  #ifndef ELIDE_CODE
+  
+  
+*** binutils-2.23/libiberty/Makefile.in.orig	2013-01-17 12:23:12.851042129 -0800
+--- binutils-2.23/libiberty/Makefile.in	2013-01-17 12:49:36.629396030 -0800
+***************
+*** 352,358 ****
+  # multilib-specific flags, it's overridden by FLAGS_TO_PASS from the
+  # default multilib, so we have to take CFLAGS into account as well,
+  # since it will be passed the multilib flags.
+! MULTIOSDIR = `$(CC) $(CFLAGS) -print-multi-os-directory`
+  install_to_libdir: all
+  	${mkinstalldirs} $(DESTDIR)$(libdir)/$(MULTIOSDIR)
+  	$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(libdir)/$(MULTIOSDIR)/$(TARGETLIB)n
+--- 352,358 ----
+  # multilib-specific flags, it's overridden by FLAGS_TO_PASS from the
+  # default multilib, so we have to take CFLAGS into account as well,
+  # since it will be passed the multilib flags.
+! MULTIOSDIR =
+  install_to_libdir: all
+  	${mkinstalldirs} $(DESTDIR)$(libdir)/$(MULTIOSDIR)
+  	$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(libdir)/$(MULTIOSDIR)/$(TARGETLIB)n
+*** binutils-2.23/opcodes/ppc-dis.c.orig	2013-01-17 19:06:08.228257752 -0600
+--- binutils-2.23/opcodes/ppc-dis.c	2013-01-22 13:26:25.155626576 -0600
+***************
+*** 23,29 ****
+--- 23,31 ----
+  #include "sysdep.h"
+  #include <stdio.h>
+  #include "dis-asm.h"
++ #ifndef _PMBFD_
+  #include "elf-bfd.h"
++ #endif
+  #include "elf/ppc.h"
+  #include "opintl.h"
+  #include "opcode/ppc.h"
+***************
+*** 199,207 ****
+--- 201,211 ----
+  
+    /* Disassemble according to the section headers flags for VLE-mode.  */
+    if (dialect & PPC_OPCODE_VLE
++ #ifndef _PMBFD_
+        && info->section->owner != NULL
+        && bfd_get_flavour (info->section->owner) == bfd_target_elf_flavour
+        && elf_object_id (info->section->owner) == PPC32_ELF_DATA
++ #endif
+        && (elf_section_flags (info->section) & SHF_PPC_VLE) != 0)
+      return dialect;
+    else
+*** binutils-2.23/bfd/coffcode.h.orig	2013-01-28 11:00:21.489846961 -0800
+--- binutils-2.23/bfd/coffcode.h	2013-01-28 11:00:32.647429277 -0800
+***************
+*** 362,367 ****
+--- 362,368 ----
+  */
+  
+  #include "libiberty.h"
++ #include "bfd_stdint.h"
+  
+  #ifdef COFF_WITH_PE
+  #include "peicode.h"
