@@ -37,7 +37,7 @@
 #endif
 
 #include "ansidecl.h"
-#include "md5.h"
+#include "../include/md5.h" /* A DIRTY HACK -- rtems also has a md5.h and the include priority is silly */
 
 #ifdef _LIBC
 # include <endian.h>
