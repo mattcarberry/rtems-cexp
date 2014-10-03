@@ -411,10 +411,11 @@ DESCRIPTION
 const char *
 bfd_format_string (bfd_format format)
 {
+#pragma GCC diagnostic warning "-Wtype-limits"
   if (((int) format < (int) bfd_unknown)
       || ((int) format >= (int) bfd_type_end))
     return "invalid";
-
+#pragma GCC diagnostic pop
   switch (format)
     {
     case bfd_object:
