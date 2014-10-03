@@ -52,13 +52,6 @@
 #endif
 #endif
 
-/* newlibc provides getopt but I have no easy way to check for newlib.
- * However, we know that rtems uses newlib...
- */
-#ifdef __rtems__
-#define ELIDE_CODE
-#endif
-
 #ifndef ELIDE_CODE
 
 

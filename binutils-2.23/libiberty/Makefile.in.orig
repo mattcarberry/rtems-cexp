@@ -352,7 +352,7 @@ install-strip: install
 # multilib-specific flags, it's overridden by FLAGS_TO_PASS from the
 # default multilib, so we have to take CFLAGS into account as well,
 # since it will be passed the multilib flags.
-MULTIOSDIR =
+MULTIOSDIR = `$(CC) $(CFLAGS) -print-multi-os-directory`
 install_to_libdir: all
 	${mkinstalldirs} $(DESTDIR)$(libdir)/$(MULTIOSDIR)
 	$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(libdir)/$(MULTIOSDIR)/$(TARGETLIB)n

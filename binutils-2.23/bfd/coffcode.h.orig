@@ -362,7 +362,6 @@ CODE_FRAGMENT
 */
 
 #include "libiberty.h"
-#include "bfd_stdint.h"
 
 #ifdef COFF_WITH_PE
 #include "peicode.h"
