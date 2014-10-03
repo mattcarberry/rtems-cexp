@@ -5670,7 +5670,7 @@ $as_echo_n "checking for 'GNU make'... " >&6; }
 $as_echo "found: $_tillac_make_command" >&6; }
 	fi
 	if _tillac_rtems_result=`$_tillac_make_command -s -f - rtems_makevars <<EOF_
-include $with_rtems_top/${host_cpu}-${host_os}/$rtems_bsp/Makefile.inc
+include $with_rtems_top/${host_cpu}-${host_os}/c/$rtems_bsp/make/Makefile.inc
 include \\\$(RTEMS_CUSTOM)
 include \\\$(CONFIG.CC)
 
